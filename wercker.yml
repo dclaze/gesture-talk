@@ -24,4 +24,6 @@ build:
   steps:
     - npm-install
     - npm-test
-    - npm-start
+    - script:
+        name: execute npm start
+        code: npm start
