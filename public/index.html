@@ -12,12 +12,42 @@
     	document.getElementById('gyroscopeZ').innerText = gyroscopeInfo.z;
     });
     </script>
+    <style>
+        body{
+            background-color: gray;
+        }
+        button{
+            padding: 50px 50px 50px 50px;
+            background-color: lightblue;
+            font-family: "Lucida Sans Unicode", "Lucida Grande", sans-serif;
+            font-size: 24px
+        }
+        h2{
+            text-align: center;
+            color: white;
+            font-family: "Lucida Sans Unicode", "Lucida Grande", sans-serif;
+        }
+
+    </style>
 </head>
 
 <body>
     <div id="gyroscopeX"></div>
     <div id="gyroscopeY"></div>
     <div id="gyroscopeZ"></div>
+
+    <div>
+        <h2>Welcome! What type of input will you be using?</h2>
+        <table border="0" align="center">
+            <tr>
+                <td><button id="gestureButton" onclick="window.location='gesture.html';">Gesture</button></td>
+                <td><button id="voiceButton" onclick="window.location='voice.html';">Voice</button></td>
+                <td><button id="textButton" onclick="window.location='text.html';">Text</button></td>
+            </tr>
+        </table>
+                    
+
+
 </body>
 
 </html>
