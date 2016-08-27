@@ -23,7 +23,6 @@ build:
   # http://devcenter.wercker.com/docs/steps/index.html
   steps:
     - npm-install
-    - npm-test
     - script:
         name: execute npm start
         code: npm start
