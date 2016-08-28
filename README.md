@@ -8,8 +8,11 @@ To get started
 Clone the source
 
 Install [MyoConnect](https://developer.thalmic.com/downloads)
+
 Download [node](https://nodejs.org/en/download/)
+
 Download [bower](https://bower.io/)
+
 Acquire Alexa device :)
 
 `
