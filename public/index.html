@@ -360,7 +360,7 @@
         window.location.reload();
     }
 
-    function sendMessageFromInput(){
+    function sendMessageFromInput() {
         var message = $('#messageInput').val();
         $('#messageInput').val("")
         sendMessage(message);
@@ -392,7 +392,11 @@
         newMessageDiv.className = "chat-bubble " + (isFromSender ? "sender" : "receiver");
         messageContainer.appendChild(newMessageDiv);
 
-        speak(message);
+        $('#chat-content').scrollTop($('#chat-content')[0].scrollHeight);
+
+        if (isFromSender) {
+            speak(message);
+        }
     }
 
     function startListeningForMessages(shouldStartListening) {
@@ -447,8 +451,6 @@
         }
     }
 
-    changeConnectedState(false);
-
     var socket = io();
     JOINING_ROOM = false;
 
@@ -460,7 +462,11 @@
     });
 
     socket.on('chatroom_begin', function() {
-        speak('Successfully joined chatroom with Alexa.');
+        Materialize.toast('Welcome Alexa to the chatroom!', 4000)
+    });
+
+    socket.on('new_user_entered', function(alias) {
+        Materialize.toast('Welcome ' + alias + ' to the chatroom!', 1000)
     });
 
     socket.on('new_message', function(message) {
@@ -509,7 +515,8 @@
             var roomId = window.location.hash.split('#')[1];
             updateRoomId(roomId);
             socket.emit('join_room', {
-                roomId: getRoomId()
+                roomId: getRoomId(),
+                alias: getAlias()
             });
 
         } else {
@@ -521,6 +528,8 @@
             edge: 'left',
         });
     });
+
+    changeConnectedState(false);
     </script>
 </body>
 
