@@ -1,4 +1,4 @@
-<html>
+<html ng-app="gestureTalk">
 
 <head>
     <title>Gesture Talk</title>
@@ -38,25 +38,34 @@
         text-align: center;
     }
     
-    .empty-chatbox {
-        height: 200px;
-        width: 200px;
-        line-height: 200px;
-    }
+    .empty-chatbox {}
     
     .empty-chatbox-message {
         width: 200px;
     }
     
+    .chatbox {
+        height: 100%;
+        width: 100%;
+        background-color: #46ab76;
+    }
+    
     .hand-image {
-        -webkit-animation: fade 2s infinite; /* Safari 4+ */
-        -moz-animation:    fade 2s infinite; /* Fx 5+ */
-        -o-animation:      fade 2s infinite; /* Opera 12+ */
-        animation:         fade 2s infinite; /* IE 10+, Fx 29+ */
         height: 200px;
         width: 200px;
+        -webkit-animation: fade 2s infinite;
+        -moz-animation: fade 2s infinite;
+        -o-animation: fade 2s infinite;
+        animation: fade 2s infinite;
+        background-repeat: no-repeat;
+        background-size: contain;
+        background-position: center;
+        background-image: url('/resources/blueHand.png');
     }
-
+    
+    .hidden {
+        display: none;
+    }
     
     .silhouette {
         height: 200px;
@@ -67,45 +76,108 @@
         background-size: contain;
         background-position: center;
     }
+    
     @-webkit-keyframes fade {
-      0%   { opacity: 0.3; }
-      50%  { opacity: 1; }
-      100% { opacity: 0.3; }
-    }
-    @-moz-keyframes fade {
-      0%   { opacity: 0.3; }
-      50%  { opacity: 1; }
-      100% { opacity: 0.3; }
-    }
-    @-o-keyframes fade {
-      0%   { opacity: 0.3; }
-      50%  { opacity: 1; }
-      100% { opacity: 0.3; }
-    }
-    @keyframes fade {
-      0%   { opacity: 0.3; }
-      50%  { opacity: 1; }
-      100% { opacity: 0.3; }
+        0% {
+            opacity: 0.3;
+        }
+        50% {
+            opacity: 1;
+        }
+        100% {
+            opacity: 0.3;
+        }
     }
     
+    @-moz-keyframes fade {
+        0% {
+            opacity: 0.3;
+        }
+        50% {
+            opacity: 1;
+        }
+        100% {
+            opacity: 0.3;
+        }
+    }
+    
+    @-o-keyframes fade {
+        0% {
+            opacity: 0.3;
+        }
+        50% {
+            opacity: 1;
+        }
+        100% {
+            opacity: 0.3;
+        }
+    }
+    
+    @keyframes fade {
+        0% {
+            opacity: 0.3;
+        }
+        50% {
+            opacity: 1;
+        }
+        100% {
+            opacity: 0.3;
+        }
+    }
     </style>
     <script src="https://cdn.socket.io/socket.io-1.4.5.js"></script>
     <script type="text/javascript" src="lib/MyoJS-master/myo.js"></script>
+</head>
+
+<body class="fullscreen column">
+    <div class="flex main-panel row">
+        <div id="empty-chatbox" class="empty-chatbox">
+            <div class="hand-image"></div>
+            <div class="empty-chatbox-message">To begin chatting, make the 'Fingers spread' gesture or click 'Start Room'</div>
+            <button onclick="joinRoom()">Start Room</button>
+        </div>
+        <div id="chatbox" class="chatbox row">
+            <div class="chat-content flex"></div>
+            <input type="text" />
+            <button>Send</button>
+        </div>
+    </div>
+    <div class="side-panel">
+        <h1>Gesture Chat</h1> Welcome to the Gesture/Voice messaging app
+        <div class="silhouette"></div>
+        <div>Your Name Here</div>
+    </div>
     <script>
     Myo.connect();
 
-    Myo.on('fingers_spread', function() {
-        speak("Activation pose detected, connecting to chat room.", function() {
-            setTimeout(function() {
-                joinRoom();
-            }, 300);
-        });
-    });
+    function changeConnectedState(connected) {
+        var emptyChatbox = document.getElementById('empty-chatbox');
+        var chatbox = document.getElementById('chatbox');
+        if (connected) {
+            emptyChatbox.hidden = true;
+            chatbox.className = chatbox.className.replace(/\bhidden\b/, "")
+            Myo.off('fingers_spread');
+        } else {
+            emptyChatbox.hidden = false;
+            chatbox.className = chatbox.className + " hidden"
+            Myo.on('fingers_spread', function() {
+                speak("Activation pose detected, connecting to chat room.", function() {
+                    setTimeout(function() {
+                        joinRoom();
+                    }, 300);
+                });
+            });
+        }
+    }
+
+    changeConnectedState(false);
 
     var socket = io();
-
-    socket.on('joined_room', function(id) {
-        speak("Alexa, ask Gesture Talk to join the room with I.D. " + id);
+    JOINING_ROOM = false;
+    socket.on('joined_room', function(roomData) {
+        changeConnectedState(true);
+        JOINING_ROOM = false;
+        speak("Alexa, ask Gesture Talk to join the room with I.D. " + roomData.speechifiedId);
     });
 
     socket.on('chatroom_begin', function() {
@@ -113,7 +185,12 @@
     });
 
     function joinRoom() {
-        socket.emit('start_room');
+        if (!JOINING_ROOM) {
+            JOINING_ROOM = true;
+            socket.emit('start_room');
+        } else {
+            console.warn("Join room requested. You are already attempting to join a room.");
+        }
     }
 
     function speak(text, callback) {
@@ -136,22 +213,6 @@
         speechSynthesis.speak(u);
     }
     </script>
-</head>
-
-<body class="fullscreen column">
-    <div class="flex main-panel row">
-        <div class="empty-chatbox">
-            <img id="green-flashing-hand" class="hand-image" src="resources/greenHand.png" style="display:none"></img>
-            <img id="blue-flashing-hand" class="hand-image" src="resources/blueHand.png" style="display:block"></img>
-        </div>
-        <div class="empty-chatbox-message">To begin chatting, make the 'Fingers spread' gesture or click 'Start Room'</div>
-        <button onclick="joinRoom()">Start Room</button>
-    </div>
-    <div class="side-panel">
-        <h1>Gesture Chat</h1> Welcome to the Gesture/Voice messaging app
-        <div class="silhouette"></div>
-        <div>Your Name Here</div>
-    </div>
 </body>
 
 </html>
