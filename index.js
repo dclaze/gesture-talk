@@ -1,10 +1,9 @@
-var app = require('express')();
+var express = require('express');
+var app = express();
 var http = require('http').Server(app);
 var io = require('socket.io')(http);
 
-app.get('/', function(req, res) {
-    res.sendfile('public/index.html');
-});
+app.use(express.static('public'));
 
 app.post('/join/:id', function(req, res) {
     io.to(req.params.id).emit('chatroom_begin');
@@ -12,11 +11,12 @@ app.post('/join/:id', function(req, res) {
 });
 
 io.on('connection', function(socket) {
-    var roomId = 'cool_kids';
-    socket.join(roomId);
-    socket.emit('joined_room', roomId)
+    socket.on('start_room', function() {
+        var roomId = "A.B.C. 1 2 3";
+        socket.join(roomId);
+        socket.emit('joined_room', roomId)
+    });
 });
-
 
 var port = (process.env.PORT || 5000);
 http.listen(port, function() {
