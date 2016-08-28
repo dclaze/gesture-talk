@@ -16,26 +16,54 @@
         flex-direction: row;
     }
     
+    .row {
+        display: flex;
+        flex-direction: column;
+    }
+    
     .flex {
         flex: 1;
     }
     
     .main-panel {
         text-align: center;
+        align-items: center;
+        justify-content: center;
     }
     
     .side-panel {
-        width: 200px;
+        width: 30%;
+        background-color: lightgray;
+        padding: 8px;
+        text-align: center;
     }
     
     .empty-chatbox {
         height: 200px;
         width: 200px;
         line-height: 200px;
-        background-color: red;
+        background-color: gray;
         border-radius: 200px;
         display: inline-block;
-        top: 50%;
+    }
+    
+    .empty-chatbox-message {
+        width: 200px;
+    }
+    
+    .hand-image {
+        height: 200px;
+        width: 200px;
+    }
+    
+    .silhouette {
+        height: 200px;
+        width: 200px;
+        margin-left: 16px;
+        background-image: url('silhouette.png');
+        background-repeat: no-repeat;
+        background-size: contain;
+        background-position: center;
     }
     </style>
     <script src="https://cdn.socket.io/socket.io-1.4.5.js"></script>
@@ -44,7 +72,7 @@
     Myo.connect();
 
     Myo.on('fingers_spread', function() {
-        speak("Activation pose detected, connecting to chat room.", function(){
+        speak("Activation pose detected, connecting to chat room.", function() {
             joinRoom();
         });
     });
@@ -86,15 +114,16 @@
 </head>
 
 <body class="fullscreen column">
-    <div class="flex main-panel">
-        <div class="empty-chatbox">Waiting for first message</div>
+    <div class="flex main-panel row">
+        <div class="empty-chatbox"><img class="hand-image" src="blue_hand.png"></img>
+        </div>
+        <div class="empty-chatbox-message">To begin chatting, make the 'Fingers spread' gesture or click 'Start Room'</div>
+        <button onclick="joinRoom()">Start Room</button>
     </div>
     <div class="side-panel">
-        <h1>Gesture Chat</h1> Welcome to the Gesture/Voice messaging app.
-        </br>
-        To begin, click 'Start Room' or 'Fingers spread' gesture
-        </br>
-        <button onclick="joinRoom()">Start Room</button>
+        <h1>Gesture Chat</h1> Welcome to the Gesture/Voice messaging app
+        <div class="silhouette"></div>
+        <div>Your Name Here</div>
     </div>
 </body>
 
