@@ -2,11 +2,23 @@ var express = require('express');
 var app = express();
 var http = require('http').Server(app);
 var io = require('socket.io')(http);
+var bodyParser = require('body-parser');
+var multer = require('multer');
+var upload = multer();
 
+app.use(bodyParser.json());
 app.use(express.static('public'));
+app.use(bodyParser.urlencoded({ extended: true }));
 
 app.post('/join/:id', function(req, res) {
     io.to(req.params.id).emit('chatroom_begin');
+    res.end();
+});
+
+app.post('/message/:id', function(req, res) {
+    var message = req.body && req.body.message || "";
+    console.log("new message for chatroom id", req.params.id, message);
+    io.to(req.params.id).emit('new_message', message);
     res.end();
 });
 

@@ -3,6 +3,10 @@
 <head>
     <title>Gesture Talk</title>
     <style>
+    body {
+        font-family: "Helvetica Neue";
+    }
+    
     .fullscreen {
         position: absolute;
         top: 0;
@@ -47,7 +51,31 @@
     .chatbox {
         height: 100%;
         width: 100%;
-        background-color: #46ab76;
+        padding: 8px;
+        list-style: none;
+    }
+    
+    .chat-bubble {
+        width: -webkit-fit-content;
+        height: -webkit-fit-content;
+        max-width: 70%;
+        margin-top: 1em;
+        padding: 0.4em 0.8em 0.4em 0.8em;
+        text-align: center;
+        overflow: wrap;
+        -webkit-border-radius: 30px;
+        -moz-border-radius: 30px;
+        border-radius: 30px;
+        position: inline-block;
+    }
+    
+    .chat-bubble.sender {
+        color: white;
+        background-color: #0B93F6;
+    }
+    
+    .chat-bubble.receiver {
+        background-color: #E5E5EA;
     }
     
     .hand-image {
@@ -57,8 +85,8 @@
         -moz-animation: fade 2s infinite;
         -o-animation: fade 2s infinite;
         animation: fade 2s infinite;
-        background-repeat: no-repeat;
         background-size: contain;
+        background-repeat: no-repeat;
         background-position: center;
         background-image: url('/resources/blueHand.png');
     }
@@ -70,11 +98,10 @@
     .silhouette {
         height: 200px;
         width: 200px;
-        margin-left: 16px;
-        background-image: url('silhouette.png');
-        background-repeat: no-repeat;
         background-size: contain;
+        background-repeat: no-repeat;
         background-position: center;
+        background-image: url('silhouette.png');
     }
     
     @-webkit-keyframes fade {
@@ -137,18 +164,63 @@
             <button onclick="joinRoom()">Start Room</button>
         </div>
         <div id="chatbox" class="chatbox row">
-            <div class="chat-content flex"></div>
+            <div id="chat-content" class="chat-content flex"></div>
             <input type="text" />
             <button>Send</button>
         </div>
     </div>
     <div class="side-panel">
-        <h1>Gesture Chat</h1> Welcome to the Gesture/Voice messaging app
+        <h1>Gesture Chat</h1>The Gesture/Voice messaging app
         <div class="silhouette"></div>
         <div>Your Name Here</div>
     </div>
     <script>
     Myo.connect();
+
+    function clearMessages() {
+        var messageContainer = document.getElementById('chat-content');
+        for (var i = 0; i < messageContainer.children.length; i++) {
+            var child = messageContainer.children[i];
+            messageContainer.removeChild(child);
+        }
+    }
+
+    function addMessage(message, isFromSender) {
+        var messageContainer = document.getElementById('chat-content');
+        var newMessageDiv = document.createElement('div');
+        newMessageDiv.innerText = message;
+        newMessageDiv.className = "chat-bubble " + (isFromSender ? "sender" : "receiver");
+        messageContainer.appendChild(newMessageDiv);
+
+        speak(message);
+    }
+
+    function startListeningForMessages(shouldStartListening) {
+        if (shouldStartListening) {
+            Myo.on('pose', function(poseName) {
+                switch (poseName) {
+                    case 'fingers_spread':
+                        addMessage("hi, how are you? I'm deaf", true);
+                        break;
+                    case 'wave_in':
+                        addMessage("Welcome, come on in :)", true);
+                        break;
+                    case 'wave_out':
+                        addMessage("Get out of my car now!", true);
+                        break;
+                    case 'fist':
+                        addMessage("Having a good night?", true);
+                        break;
+                    default:
+                        addMessage("hello, can you hear me?");
+                }
+
+            });
+        } else {
+            Myo.off('pose');
+        }
+
+    };
 
     function changeConnectedState(connected) {
         var emptyChatbox = document.getElementById('empty-chatbox');
@@ -157,7 +229,10 @@
             emptyChatbox.hidden = true;
             chatbox.className = chatbox.className.replace(/\bhidden\b/, "")
             Myo.off('fingers_spread');
+
+            startListeningForMessages(true);
         } else {
+            clearMessages();
             emptyChatbox.hidden = false;
             chatbox.className = chatbox.className + " hidden"
             Myo.on('fingers_spread', function() {
@@ -167,6 +242,8 @@
                     }, 300);
                 });
             });
+
+            startListeningForMessages(false);
         }
     }
 
@@ -174,14 +251,20 @@
 
     var socket = io();
     JOINING_ROOM = false;
+
     socket.on('joined_room', function(roomData) {
         changeConnectedState(true);
         JOINING_ROOM = false;
+        console.log(roomData.roomId);
         speak("Alexa, ask Gesture Talk to join the room with I.D. " + roomData.speechifiedId);
     });
 
     socket.on('chatroom_begin', function() {
         speak('Successfully joined chatroom with Alexa.');
+    });
+
+    socket.on('new_message', function(message) {
+        addMessage(message, false);
     });
 
     function joinRoom() {

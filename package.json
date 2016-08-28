@@ -18,7 +18,9 @@
   },
   "homepage": "https://github.com/dclaze/who-might-be-robots#readme",
   "dependencies": {
+    "body-parser": "^1.15.2",
     "express": "^4.14.0",
+    "multer": "^1.2.0",
     "socket.io": "^1.4.8"
   },
   "devDependencies": {
