@@ -2,52 +2,41 @@
 
 <head>
     <title>Dumper - Myo</title>
-    <script src="lib/MyoJS-master/myo.js"></script>
+    <script src="https://cdn.socket.io/socket.io-1.4.5.js"></script>
     <script>
-    Myo.connect();
-    
-    Myo.on('gyroscope', function(gyroscopeInfo) {
-    	document.getElementById('gyroscopeX').innerText = gyroscopeInfo.x;
-    	document.getElementById('gyroscopeY').innerText = gyroscopeInfo.y;
-    	document.getElementById('gyroscopeZ').innerText = gyroscopeInfo.z;
-    });
+    var socket = io();
+    socket.on('joined_room', function(id){
+        speak("Alexa, ask Gesture Talk to join the room with I.D. "+id);
+    })
+    socket.on('chatroom_begin', function(){
+        speak('Successfully joined chatroom with Alexa')
+    })
     </script>
-    <style>
-        body{
-            background-color: gray;
-        }
-        button{
-            padding: 50px 50px 50px 50px;
-            background-color: lightblue;
-            font-family: "Lucida Sans Unicode", "Lucida Grande", sans-serif;
-            font-size: 24px
-        }
-        h2{
-            text-align: center;
-            color: white;
-            font-family: "Lucida Sans Unicode", "Lucida Grande", sans-serif;
-        }
+    <script>
+    function speak(text, callback) {
+        var u = new SpeechSynthesisUtterance();
+        u.text = text;
+        u.lang = 'en-US';
 
-    </style>
+        u.onend = function() {
+            if (callback) {
+                callback();
+            }
+        };
+
+        u.onerror = function(e) {
+            if (callback) {
+                callback(e);
+            }
+        };
+
+        speechSynthesis.speak(u);
+    }
+    </script>
 </head>
 
 <body>
-    <div id="gyroscopeX"></div>
-    <div id="gyroscopeY"></div>
-    <div id="gyroscopeZ"></div>
-
-    <div>
-        <h2>Welcome! What type of input will you be using?</h2>
-        <table border="0" align="center">
-            <tr>
-                <td><button id="gestureButton" onclick="window.location='gesture.html';">Gesture</button></td>
-                <td><button id="voiceButton" onclick="window.location='voice.html';">Voice</button></td>
-                <td><button id="textButton" onclick="window.location='text.html';">Text</button></td>
-            </tr>
-        </table>
-                    
-
-
+    <h1>Welcome to the first ever* Gesture/Voice Messenging App</h1> To begin, please use the finger spread motion.
 </body>
 
 </html>
