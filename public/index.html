@@ -42,9 +42,6 @@
         height: 200px;
         width: 200px;
         line-height: 200px;
-        background-color: gray;
-        border-radius: 200px;
-        display: inline-block;
     }
     
     .empty-chatbox-message {
@@ -52,9 +49,14 @@
     }
     
     .hand-image {
+        -webkit-animation: fade 2s infinite; /* Safari 4+ */
+        -moz-animation:    fade 2s infinite; /* Fx 5+ */
+        -o-animation:      fade 2s infinite; /* Opera 12+ */
+        animation:         fade 2s infinite; /* IE 10+, Fx 29+ */
         height: 200px;
         width: 200px;
     }
+
     
     .silhouette {
         height: 200px;
@@ -65,6 +67,27 @@
         background-size: contain;
         background-position: center;
     }
+    @-webkit-keyframes fade {
+      0%   { opacity: 0.3; }
+      50%  { opacity: 1; }
+      100% { opacity: 0.3; }
+    }
+    @-moz-keyframes fade {
+      0%   { opacity: 0.3; }
+      50%  { opacity: 1; }
+      100% { opacity: 0.3; }
+    }
+    @-o-keyframes fade {
+      0%   { opacity: 0.3; }
+      50%  { opacity: 1; }
+      100% { opacity: 0.3; }
+    }
+    @keyframes fade {
+      0%   { opacity: 0.3; }
+      50%  { opacity: 1; }
+      100% { opacity: 0.3; }
+    }
+    
     </style>
     <script src="https://cdn.socket.io/socket.io-1.4.5.js"></script>
     <script type="text/javascript" src="lib/MyoJS-master/myo.js"></script>
@@ -115,7 +138,9 @@
 
 <body class="fullscreen column">
     <div class="flex main-panel row">
-        <div class="empty-chatbox"><img class="hand-image" src="blue_hand.png"></img>
+        <div class="empty-chatbox">
+            <img id="green-flashing-hand" class="hand-image" src="resources/greenHand.png" style="display:none"></img>
+            <img id="blue-flashing-hand" class="hand-image" src="resources/blueHand.png" style="display:block"></img>
         </div>
         <div class="empty-chatbox-message">To begin chatting, make the 'Fingers spread' gesture or click 'Start Room'</div>
         <button onclick="joinRoom()">Start Room</button>
