@@ -16,5 +16,8 @@
   "bugs": {
     "url": "https://github.com/dclaze/who-might-be-robots/issues"
   },
-  "homepage": "https://github.com/dclaze/who-might-be-robots#readme"
+  "homepage": "https://github.com/dclaze/who-might-be-robots#readme",
+  "dependencies": {
+    "express": "^4.14.0"
+  }
 }

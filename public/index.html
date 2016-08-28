@@ -1,0 +1,23 @@
+<html>
+
+<head>
+    <title>Dumper - Myo</title>
+    <script src="lib/MyoJS-master/myo.js"></script>
+    <script>
+    Myo.connect();
+    
+    Myo.on('gyroscope', function(gyroscopeInfo) {
+    	document.getElementById('gyroscopeX').innerText = gyroscopeInfo.x;
+    	document.getElementById('gyroscopeY').innerText = gyroscopeInfo.y;
+    	document.getElementById('gyroscopeZ').innerText = gyroscopeInfo.z;
+    });
+    </script>
+</head>
+
+<body>
+    <div id="gyroscopeX"></div>
+    <div id="gyroscopeY"></div>
+    <div id="gyroscopeZ"></div>
+</body>
+
+</html>
