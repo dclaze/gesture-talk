@@ -17,6 +17,7 @@ app.post('/join/:id', function(req, res) {
 
 app.post('/message/:id', function(req, res) {
     var message = req.body && req.body.message || "";
+    console.log(message);
     console.log("new message for chatroom id", req.params.id, message);
     io.to(req.params.id).emit('new_message', message);
     res.end();
@@ -54,6 +55,20 @@ io.on('connection', function(socket) {
             speechifiedId: speechifyId(roomId)
         });
     });
+
+    socket.on('send_message', function(messageData) {
+    	console.log(messageData.roomId, messageData.message);
+    	console.log(io.sockets.adapter.rooms);
+        socket.broadcast.to(messageData.roomId).emit('new_message', messageData.message);
+    });
+
+    socket.on('join_room', function(data) {
+        socket.join(data.roomId);
+        socket.emit('joined_room', {
+            roomId: data.roomId,
+            speechifiedId: speechifyId(data.roomId)
+        });
+    })
 });
 
 var port = (process.env.PORT || 5000);

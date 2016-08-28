@@ -235,6 +235,10 @@
     .input-field .prefix.active {
         color: #01579b;
     }
+    
+    .roomId {
+        font-size: 3em;
+    }
     </style>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.0/jquery.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.97.7/js/materialize.min.js"></script>
@@ -254,9 +258,10 @@
         <h1>Gesture Chat</h1>
         <span class="text-longshadow">The Gesture/Voice messaging app</span>
         <div class="silhouette"></div>
-        <div>Your Name Here</div>
-        <a class="waves-effect waves-light btn light-blue darken-4 white-text">Reset</a>
-        <a class="waves-effect waves-light btn light-blue darken-4 white-text" style="color:white">Logout</a>
+        <div id="alias-view"></div>
+        <a class="waves-effect waves-light btn light-blue darken-4 white-text" onclick="clearChatHistory()">Reset</a>
+        <a class="waves-effect waves-light btn light-blue darken-4 white-text" style="color:white" onclick="logout()">Logout</a>
+        <div class="roomId" id="roomId"></div>
     </div>
     <main class="column flex">
         <div class="flex main-panel row">
@@ -265,15 +270,15 @@
                 <div class="empty-chatbox-message">
                     OR
                 </div>
-                <a class="waves-effect waves-light btn-large light-blue darken-4 white-text" onclick="joinRoom()">Start Room</a>
+                <a class="waves-effect waves-light btn-large light-blue darken-4 white-text" onclick="startRoom()">Start Room</a>
             </div>
             <div id="chatbox" class="chatbox row">
                 <div id="chat-content" class="chat-content flex"></div>
                 <form class="column">
                     <div class="input-field flex">
-                        <input type="text" placeholder="Type your message here" />
+                        <input id="messageInput" type="text" placeholder="Type your message here" />
                     </div>
-                    <button type="submit" class="waves-effect waves-light waves-blue btn-floating btn-large light-blue darken-4 white-text" onclick="addMessage('Test', Math.floor(Math.random()*2))"><i class="material-icons">send</i></button>
+                    <button type="submit" class="waves-effect waves-light waves-blue btn-floating btn-large light-blue darken-4 white-text" onclick="sendMessageFromInput()"><i class="material-icons">send</i></button>
                 </form>
             </div>
         </div>
@@ -281,24 +286,88 @@
             <div class="modal-content">
                 <h4>Choose alias</h4>
                 <div class="input-field blue-focus">
-                    <input placeholder="Alias" type="text">
+                    <input id="alias" placeholder="Alias" type="text">
                 </div>
             </div>
             <div class="modal-footer">
-                <a href="#!" class=" modal-action modal-close waves-effect waves-blue btn-flat">Agree</a>
-                <a href="#!" class=" modal-action modal-close waves-effect waves-blue btn-flat">Skip</a>
+                <a href="#!" class=" modal-action modal-close waves-effect waves-blue btn-flat" onclick="updateAliasFromInput()">Agree</a>
+                <a href="#!" class=" modal-action modal-close waves-effect waves-blue btn-flat" onclick="updateAliasWithRandomName()">Skip</a>
             </div>
         </div>
     </main>
     <script>
-    $(document).ready(function() {
-        $('#modal1').openModal();
-        $('.button-collapse').sideNav({
-            menuWidth: 300,
-            edge: 'left',
+    function updateAliasFromInput(element) {
+        updateAlias($('#alias').val())
+    }
+
+    function updateAliasWithRandomName() {
+        $.ajax({
+            url: 'https://randomuser.me/api/',
+            dataType: 'json',
+            success: function(data) {
+                if (data && data.results.length) {
+                    updateAlias([data.results[0].name.first, data.results[0].name.last].join(" "));
+                } else {
+                    updateAlias("Bob");
+                }
+
+            },
+            error: function() {
+                updateAlias("Error Guy");
+            }
         });
-    });
+    }
+
+    function updateAlias(alias) {
+        localStorage.setItem('alias', alias);
+        $('alias-view').text(alias);
+    }
+
+    function getAlias() {
+        return localStorage.getItem('alias');
+    }
+
+    function removeAlias() {
+        localStorage.removeItem('alias');
+    }
+
+    function clearChatHistory() {
+
+    }
+
+    function updateRoomId(roomId) {
+        $('#roomId').text(roomId);
+        localStorage.setItem('room-id', roomId);
+        if (roomId) {
+            window.location.hash = roomId;
+        } else {
+            window.location.hash = "";
+        }
+
+    }
+
+    function getRoomId() {
+        return localStorage.getItem('room-id');
+    }
+
+    function removeRoomId() {
+        localStorage.removeItem('room-id');
+    }
+
+    function logout() {
+        removeAlias();
+        removeRoomId();
+        window.location.reload();
+    }
+
+    function sendMessageFromInput(){
+        var message = $('#messageInput').val();
+        $('#messageInput').val("")
+        sendMessage(message);
+    }
+
     Myo.connect();
+
 
     function clearMessages() {
         var messageContainer = document.getElementById('chat-content');
@@ -306,6 +375,14 @@
             var child = messageContainer.children[i];
             messageContainer.removeChild(child);
         }
+    }
+
+    function sendMessage(message) {
+        socket.emit('send_message', {
+            roomId: getRoomId(),
+            message: message
+        });
+        addMessage(message, true);
     }
 
     function addMessage(message, isFromSender) {
@@ -323,19 +400,19 @@
             Myo.on('pose', function(poseName) {
                 switch (poseName) {
                     case 'fingers_spread':
-                        addMessage("hi, how are you? I'm deaf", true);
+                        sendMessage("hi, how are you? I'm deaf", true);
                         break;
                     case 'wave_in':
-                        addMessage("Welcome, come on in :)", true);
+                        sendMessage("Welcome, come on in :)", true);
                         break;
                     case 'wave_out':
-                        addMessage("Get out of my car now!", true);
+                        sendMessage("Get out of my car now!", true);
                         break;
                     case 'fist':
-                        addMessage("Having a good night?", true);
+                        sendMessage("Having a good night?", true);
                         break;
                     default:
-                        addMessage("hello, can you hear me?");
+                        sendMessage("hello, can you hear me?");
                 }
 
             });
@@ -361,7 +438,7 @@
             Myo.on('fingers_spread', function() {
                 speak("Activation pose detected, connecting to chat room.", function() {
                     setTimeout(function() {
-                        joinRoom();
+                        startRoom();
                     }, 300);
                 });
             });
@@ -378,7 +455,7 @@
     socket.on('joined_room', function(roomData) {
         changeConnectedState(true);
         JOINING_ROOM = false;
-        console.log(roomData.roomId);
+        updateRoomId(roomData.roomId);
         speak("Alexa, ask Gesture Talk to join the room with I.D. " + roomData.speechifiedId);
     });
 
@@ -390,10 +467,12 @@
         addMessage(message, false);
     });
 
-    function joinRoom() {
+    function startRoom() {
         if (!JOINING_ROOM) {
             JOINING_ROOM = true;
-            socket.emit('start_room');
+            socket.emit('start_room', {
+                name: getAlias()
+            });
         } else {
             console.warn("Join room requested. You are already attempting to join a room.");
         }
@@ -418,6 +497,30 @@
 
         speechSynthesis.speak(u);
     }
+
+    $(document).ready(function() {
+        if (!getAlias()) {
+            $('#modal1').openModal();
+        } else {
+            $('#alias-view').text(getAlias());
+        }
+
+        if (window.location.hash) {
+            var roomId = window.location.hash.split('#')[1];
+            updateRoomId(roomId);
+            socket.emit('join_room', {
+                roomId: getRoomId()
+            });
+
+        } else {
+            updateRoomId(undefined);
+        }
+
+        $('.button-collapse').sideNav({
+            menuWidth: 300,
+            edge: 'left',
+        });
+    });
     </script>
 </body>
 
