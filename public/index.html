@@ -96,7 +96,9 @@
 
     Myo.on('fingers_spread', function() {
         speak("Activation pose detected, connecting to chat room.", function() {
-            joinRoom();
+            setTimeout(function() {
+                joinRoom();
+            }, 300);
         });
     });
 
