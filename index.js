@@ -29,7 +29,7 @@ function roomIdExists(roomId) {
 
 function generateId() {
     var id = "";
-    var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+    var possible = "0123456789";
 
     for (var i = 0; i < 6; i++)
         id += possible.charAt(Math.floor(Math.random() * possible.length));
@@ -67,8 +67,7 @@ io.on('connection', function(socket) {
             roomId: data.roomId,
             speechifiedId: speechifyId(data.roomId)
         });
-        console.log('New Alias Detected', data.alias);
-        socket.broadcast.to(data.roomId).emit('new_user_entered', data.alias);
+        console.log('New Alias Detected', data);
     })
 });
 
