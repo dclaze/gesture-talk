@@ -2,6 +2,7 @@
 
 <head>
     <title>Gesture Talk</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
     <style>
     body {
         font-family: "Helvetica Neue";
@@ -29,22 +30,38 @@
         flex: 1;
     }
     
+    .top-bar {
+        background-color: #00ddcc;
+    }
+    
+    .logo {
+        height: 40px;
+    }
+    
     .main-panel {
         text-align: center;
         align-items: center;
         justify-content: center;
     }
     
-    .side-panel {
+    .side-nav {
         width: 30%;
         background-color: lightgray;
         padding: 8px;
         text-align: center;
     }
     
+    @media screen and (max-width: 600px) {
+        .side-panel {
+            display: none;
+        }
+    }
+    
     .empty-chatbox {}
     
     .empty-chatbox-message {
+        margin-top: 16px;
+        margin-bottom: 16px;
         width: 200px;
     }
     
@@ -52,26 +69,31 @@
         height: 100%;
         width: 100%;
         padding: 8px;
-        list-style: none;
+    }
+    
+    .chat-content {
+        overflow: scroll;
     }
     
     .chat-bubble {
-        width: -webkit-fit-content;
-        height: -webkit-fit-content;
         max-width: 70%;
-        margin-top: 1em;
-        padding: 0.4em 0.8em 0.4em 0.8em;
+        padding: 10px 20px;
         text-align: center;
         overflow: wrap;
-        -webkit-border-radius: 30px;
-        -moz-border-radius: 30px;
-        border-radius: 30px;
+        -webkit-border-radius: 25px;
+        -moz-border-radius: 25px;
+        border-radius: 25px;
         position: inline-block;
+        word-wrap: break-word;
+        margin-bottom: 20px;
+        line-height: 24px;
+        font-size: 20px;
     }
     
     .chat-bubble.sender {
         color: white;
-        background-color: #0B93F6;
+        background-color: #01579b;
+        /*float:right;*/
     }
     
     .chat-bubble.receiver {
@@ -88,7 +110,7 @@
         background-size: contain;
         background-repeat: no-repeat;
         background-position: center;
-        background-image: url('/resources/blueHand.png');
+        background-image: url('/resources/hand.png');
     }
     
     .hidden {
@@ -98,10 +120,17 @@
     .silhouette {
         height: 200px;
         width: 200px;
+        border-radius: 200px;
+        margin: auto;
         background-size: contain;
         background-repeat: no-repeat;
         background-position: center;
         background-image: url('silhouette.png');
+        cursor: pointer;
+    }
+    
+    .silhouette:hover {
+        opacity: 0.5;
     }
     
     @-webkit-keyframes fade {
@@ -151,30 +180,124 @@
             opacity: 0.3;
         }
     }
+    
+    header,
+    main,
+    footer {
+        padding-left: 300px;
+    }
+    
+    @media only screen and (max-width: 992px) {
+        header,
+        main,
+        footer {
+            padding-left: 0;
+        }
+    }
+    
+    button {
+        color: white;
+    }
     </style>
+    <link href="http://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.97.7/css/materialize.min.css">
+    <style>
+    /* label color */
+    
+    .input-field label {
+        color: #01579b;
+    }
+    /* label focus color */
+    
+    .input-field input[type=text]:focus + label {
+        color: #01579b;
+    }
+    /* label underline focus color */
+    
+    .input-field input[type=text]:focus {
+        border-bottom: 1px solid #01579b;
+        box-shadow: 0 1px 0 0 #01579b;
+    }
+    /* valid color */
+    
+    .input-field input[type=text].valid {
+        border-bottom: 1px solid #01579b;
+        box-shadow: 0 1px 0 0 #01579b;
+    }
+    /* invalid color */
+    
+    .input-field input[type=text].invalid {
+        border-bottom: 1px solid #01579b;
+        box-shadow: 0 1px 0 0 #01579b;
+    }
+    /* icon prefix focus color */
+    
+    .input-field .prefix.active {
+        color: #01579b;
+    }
+    </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.0/jquery.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.97.7/js/materialize.min.js"></script>
     <script src="https://cdn.socket.io/socket.io-1.4.5.js"></script>
     <script type="text/javascript" src="lib/MyoJS-master/myo.js"></script>
 </head>
 
-<body class="fullscreen column">
-    <div class="flex main-panel row">
-        <div id="empty-chatbox" class="empty-chatbox">
-            <div class="hand-image"></div>
-            <div class="empty-chatbox-message">To begin chatting, make the 'Fingers spread' gesture or click 'Start Room'</div>
-            <button onclick="joinRoom()">Start Room</button>
+<body class="fullscreen row">
+    <header>
+        <div class="column">
+            <a href="#" data-activates="slide-out" class="button-collapse" style="margin-top:8px;"><i class="material-icons hide-on-large-only">menu</i></a>
+            <div class="flex"><img class="logo" src="resources/gesture-chat.png"></img>
+            </div>
         </div>
-        <div id="chatbox" class="chatbox row">
-            <div id="chat-content" class="chat-content flex"></div>
-            <input type="text" />
-            <button>Send</button>
-        </div>
-    </div>
-    <div class="side-panel">
-        <h1>Gesture Chat</h1>The Gesture/Voice messaging app
+    </header>
+    <div id="slide-out" class="side-nav fixed">
+        <h1>Gesture Chat</h1>
+        <span class="text-longshadow">The Gesture/Voice messaging app</span>
         <div class="silhouette"></div>
         <div>Your Name Here</div>
+        <a class="waves-effect waves-light btn light-blue darken-4 white-text">Reset</a>
+        <a class="waves-effect waves-light btn light-blue darken-4 white-text" style="color:white">Logout</a>
     </div>
+    <main class="column flex">
+        <div class="flex main-panel row">
+            <div id="empty-chatbox" class="empty-chatbox">
+                <div class="hand-image"></div>
+                <div class="empty-chatbox-message">
+                    OR
+                </div>
+                <a class="waves-effect waves-light btn-large light-blue darken-4 white-text" onclick="joinRoom()">Start Room</a>
+            </div>
+            <div id="chatbox" class="chatbox row">
+                <div id="chat-content" class="chat-content flex"></div>
+                <form class="column">
+                    <div class="input-field flex">
+                        <input type="text" placeholder="Type your message here" />
+                    </div>
+                    <button type="submit" class="waves-effect waves-light waves-blue btn-floating btn-large light-blue darken-4 white-text" onclick="addMessage('Test', Math.floor(Math.random()*2))"><i class="material-icons">send</i></button>
+                </form>
+            </div>
+        </div>
+        <div id="modal1" class="modal">
+            <div class="modal-content">
+                <h4>Choose alias</h4>
+                <div class="input-field blue-focus">
+                    <input placeholder="Alias" type="text">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <a href="#!" class=" modal-action modal-close waves-effect waves-blue btn-flat">Agree</a>
+                <a href="#!" class=" modal-action modal-close waves-effect waves-blue btn-flat">Skip</a>
+            </div>
+        </div>
+    </main>
     <script>
+    $(document).ready(function() {
+        $('#modal1').openModal();
+        $('.button-collapse').sideNav({
+            menuWidth: 300,
+            edge: 'left',
+        });
+    });
     Myo.connect();
 
     function clearMessages() {
