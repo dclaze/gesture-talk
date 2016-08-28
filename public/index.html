@@ -357,6 +357,7 @@
     function logout() {
         removeAlias();
         removeRoomId();
+        window.location.hash = ""
         window.location.reload();
     }
 
@@ -404,19 +405,19 @@
             Myo.on('pose', function(poseName) {
                 switch (poseName) {
                     case 'fingers_spread':
-                        sendMessage("hi, how are you? I'm deaf", true);
+                        sendMessage("Hi, how are you? I'm a hard of hearing driver.", true);
                         break;
                     case 'wave_in':
                         sendMessage("Welcome, come on in :)", true);
                         break;
                     case 'wave_out':
-                        sendMessage("Get out of my car now!", true);
+                        sendMessage("Is this stop ok?", true);
                         break;
                     case 'fist':
-                        sendMessage("Having a good night?", true);
+                        sendMessage("Go Giants!", true);
                         break;
                     default:
-                        sendMessage("hello, can you hear me?");
+                        sendMessage("Hello, world.");
                 }
 
             });
@@ -441,9 +442,7 @@
             chatbox.className = chatbox.className + " hidden"
             Myo.on('fingers_spread', function() {
                 speak("Activation pose detected, connecting to chat room.", function() {
-                    setTimeout(function() {
-                        startRoom();
-                    }, 300);
+                    startRoom();
                 });
             });
 
@@ -476,9 +475,11 @@
     function startRoom() {
         if (!JOINING_ROOM) {
             JOINING_ROOM = true;
-            socket.emit('start_room', {
-                name: getAlias()
-            });
+            setTimeout(function() {
+                socket.emit('start_room', {
+                    name: getAlias()
+                });
+            }, 500);
         } else {
             console.warn("Join room requested. You are already attempting to join a room.");
         }

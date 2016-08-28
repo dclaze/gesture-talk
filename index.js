@@ -57,8 +57,7 @@ io.on('connection', function(socket) {
     });
 
     socket.on('send_message', function(messageData) {
-    	console.log(messageData.roomId, messageData.message);
-    	console.log(io.sockets.adapter.rooms);
+        console.log(messageData);
         socket.broadcast.to(messageData.roomId).emit('new_message', messageData.message);
     });
 
@@ -68,6 +67,8 @@ io.on('connection', function(socket) {
             roomId: data.roomId,
             speechifiedId: speechifyId(data.roomId)
         });
+        console.log('New Alias Detected', data.alias);
+        socket.broadcast.to(data.roomId).emit('new_user_entered', data.alias);
     })
 });
 
