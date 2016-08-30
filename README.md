@@ -1,29 +1,17 @@
-# who-might-be-robots
-Our hackathon submission for /hack.
+# gesture-talk
+Messaging app using gestures (and more!) as input.
 
-Getting started
-======
-To get started
+Original [/hack](https://www.hackerearth.com/slash-hack/) hackathon concept. Submission [here](https://slashhack.hackerearth.com/sprints/hack/teams/ad95e19/submission/). Results [here](https://slashhack.hackerearth.com/sprints/hack/winners/) ;)
 
-Clone the source
+## Getting started
 
-Install [MyoConnect](https://developer.thalmic.com/downloads)
+Buy a [Myo](https://www.myo.com/)
 
-Download [node](https://nodejs.org/en/download/)
+Install [Myo Connect](https://developer.thalmic.com/downloads)
 
-Download [bower](https://bower.io/)
+`npm install`
 
-Acquire Alexa device :)
+`npm start`
 
-`
-npm install -g bower;
-npm install;
-bower install;
-npm start;
-Launch browser on port 5000
-`
-
-Hackers
-======
-Doug Colaizzo
-Joey Colaizzo
+## Try it yourself
+[Demo](http://glacial-shore-38539.herokuapp.com/)
